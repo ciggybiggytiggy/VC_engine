@@ -1,0 +1,394 @@
+TREND_KEYWORDS = {
+    "DTC": ["dtc", "direct-to-consumer"],
+    "Creator-led": ["creator", "tiktok", "influencer"],
+    "Resale": ["resale", "recommerce"],
+    "Clean Beauty": ["clean beauty", "non-toxic"],
+    "Sustainable": ["sustainable", "circular"],
+    "AI Healthcare": ["ai drug discovery", "generative ai in healthcare", "clinical workflow tools", "predictive analytics", "ai imaging", "data validation"],
+    "Digital Health": ["remote patient monitoring", "rpm", "wearables", "telehealth 2.0", "patient-centric care platforms", "interoperability"],
+    "Biotech": ["oncology", "neuroscience", "alzheimer's", "parkinson's", "regenerative therapies", "gene therapy", "mrna technology"],
+    "MedTech": ["robotics", "smart diagnostics", "femtech", "onshoring", "supply chain resilience"],
+    "Healthcare Operations": ["scalable business models", "regulatory compliance", "fda pathways", "value-based care", "clinical efficacy"],
+    "Aging & Care Delivery": ["chronic disease management", "home healthcare solutions", "specialty care access"],
+    # --- AI & DATA SYSTEMS ---
+
+    "AI Agents & Autonomous Systems": [
+        "agentic ai",
+        "ai agents",
+        "autonomous ai agents",
+        "actionable ai systems"
+    ],
+
+    "Predictive Analytics & Forecasting": [
+        "predictive analytics",
+        "demand forecasting",
+        "inventory forecasting",
+        "supply chain analytics",
+        "predictive diagnostics"
+    ],
+
+    "AI Personalization & Marketing": [
+        "ai powered personalization",
+        "ai personalization retail",
+        "ai driven marketing",
+        "data driven recommendations"
+    ],
+
+    # --- FINTECH ---
+
+    "Generative AI in Finance": [
+        "generative ai finance",
+        "ai financial automation",
+        "personalized financial insights ai",
+        "generative ai compliance"
+    ],
+
+    "AI Underwriting & Fraud Detection": [
+        "ai underwriting",
+        "ai driven underwriting",
+        "ai fraud detection",
+        "fraud detection ai",
+        "ai credit risk"
+    ],
+
+    "Blockchain Infrastructure & Tokenization": [
+        "blockchain infrastructure",
+        "asset tokenization",
+        "tokenized real world assets",
+        "blockchain financial infrastructure"
+    ],
+
+    "Embedded Finance & BaaS": [
+        "embedded finance",
+        "banking as a service",
+        "baas",
+        "embedded payments",
+        "embedded lending"
+    ],
+
+    "Fintech Infrastructure & APIs": [
+        "payment infrastructure",
+        "api first fintech",
+        "financial apis",
+        "data aggregation fintech",
+        "back office automation"
+    ],
+
+    "B2B Fintech & SME SaaS": [
+        "b2b fintech",
+        "sme fintech",
+        "fintech saas",
+        "accounting saas",
+        "payroll saas"
+    ],
+
+    "Vertical Fintech": [
+        "vertical fintech",
+        "vertical saas fintech",
+        "fintech for cfos",
+        "industry specific fintech"
+    ],
+
+    "Real-time & Cross-border Payments": [
+        "real time payments",
+        "instant payments",
+        "cross border payments",
+        "international payments fintech"
+    ],
+
+    "RegTech & Compliance Tech": [
+        "regtech",
+        "automated compliance",
+        "kyc automation",
+        "aml automation",
+        "kyb",
+        "regulatory compliance software"
+    ],
+
+    "Data Privacy & Security": [
+        "data privacy fintech",
+        "financial data security",
+        "cybersecurity fintech",
+        "secure financial data"
+    ],
+
+    # --- LOGISTICS / SUPPLY CHAIN ---
+
+    "AI Logistics & Control Towers": [
+        "generative ai logistics",
+        "logistics orchestration platform",
+        "supply chain control tower",
+        "real time logistics decision making"
+    ],
+
+    "Warehouse Robotics & Automation": [
+        "autonomous mobile robots",
+        "warehouse picking robots",
+        "robotic warehouse picking",
+        "automated warehouse storage"
+    ],
+
+    "ASRS Warehouse Systems": [
+        "asrs",
+        "automated storage retrieval system",
+        "warehouse automation system"
+    ],
+
+    "Brownfield Warehouse Automation": [
+        "brownfield automation",
+        "legacy warehouse automation",
+        "warehouse retrofit automation"
+    ],
+
+    "Micro Fulfillment Centers": [
+        "micro fulfillment center",
+        "automated micro fulfillment",
+        "same day delivery fulfillment"
+    ],
+
+    "Supply Chain Visibility": [
+        "supply chain visibility",
+        "end to end logistics tracking",
+        "real time shipment tracking"
+    ],
+
+    "Digital Twins Supply Chain": [
+        "digital twin supply chain",
+        "supply chain simulation",
+        "logistics digital twin"
+    ],
+
+    "Logistics API & EDI Integration": [
+        "edi logistics integration",
+        "logistics api platform",
+        "carrier integration api"
+    ],
+
+    "Blockchain Traceability": [
+        "blockchain supply chain",
+        "digital traceability logistics",
+        "blockchain shipment tracking"
+    ],
+
+    "Green Logistics & Decarbonization": [
+        "green logistics",
+        "logistics decarbonization",
+        "sustainable supply chain",
+        "electric delivery fleets"
+    ],
+
+    "Carbon Tracking & Reporting": [
+        "carbon tracking logistics",
+        "supply chain emissions reporting"
+    ],
+
+    "Nearshoring & Regionalization": [
+        "nearshoring supply chain",
+        "regional manufacturing",
+        "supply chain regionalization"
+    ],
+
+    "Reverse Logistics": [
+        "reverse logistics",
+        "returns management platform",
+        "ecommerce returns logistics"
+    ],
+
+    "Digital Freight Marketplaces": [
+        "digital freight brokerage",
+        "freight marketplace",
+        "ai freight matching"
+    ],
+
+    "3PL & 4PL Technology": [
+        "3pl technology",
+        "4pl logistics platform",
+        "third party logistics software"
+    ],
+
+    "Logistics Workforce Automation": [
+        "warehouse labor automation",
+        "logistics workforce automation"
+    ],
+
+    # --- RETAIL / CPG / BEAUTY ---
+
+    "Virtual Try-On & Diagnostics": [
+        "virtual try on",
+        "ar try on",
+        "virtual skin diagnostics",
+        "ai skin analysis"
+    ],
+
+    "Biotech Beauty": [
+        "biotech beauty",
+        "bioengineered ingredients",
+        "lab grown ingredients",
+        "synthetic biology beauty"
+    ],
+
+    "Sustainable Beauty & Packaging": [
+        "sustainable packaging",
+        "circular beauty",
+        "zero waste beauty"
+    ],
+
+    "Clinical Skincare": [
+        "clinical grade skincare",
+        "science backed skincare",
+        "dermatologist tested skincare"
+    ],
+
+    "Microbiome & Skin Health": [
+        "skin microbiome",
+        "microbiome friendly skincare",
+        "probiotic skincare"
+    ],
+
+    "Functional Fragrance": [
+        "functional fragrance",
+        "wellness fragrance",
+        "mood enhancing fragrance"
+    ],
+
+    "Hormonal & Menopause Beauty": [
+        "menopause skincare",
+        "hormonal skin solutions"
+    ],
+
+    "Recommerce & Resale": [
+        "recommerce",
+        "resale fashion",
+        "secondhand marketplace"
+    ],
+
+    "Direct-to-Consumer Brands": [
+        "direct to consumer",
+        "dtc brand",
+        "digital first brand"
+    ],
+
+    "Community-Driven Brands": [
+        "community first brand",
+        "creator led brand",
+        "community driven commerce"
+    ],
+
+    "Supply Chain Optimization Retail": [
+        "supply chain optimization",
+        "inventory optimization retail"
+    ],
+
+    "Customer Loyalty & Retention": [
+        "customer loyalty",
+        "strong retention",
+        "active customer engagement"
+    ],
+
+    # --- HEALTH TECH ---
+
+    "AI Diagnostics & Medical Imaging": [
+        "ai powered diagnostics",
+        "ai medical imaging",
+        "ai radiology",
+        "early disease detection ai"
+    ],
+
+    "Clinical Workflow Automation": [
+        "clinical workflow automation",
+        "healthcare workflow automation",
+        "hospital workflow optimization"
+    ],
+
+    "Remote Patient Monitoring": [
+        "remote patient monitoring",
+        "rpm healthcare",
+        "home health monitoring"
+    ],
+
+    "Generative AI Drug Discovery": [
+        "generative ai drug discovery",
+        "ai drug discovery",
+        "computational drug discovery"
+    ],
+
+    "Femtech": [
+        "femtech",
+        "womens health technology",
+        "fertility technology"
+    ],
+
+    "Value-Based Care Platforms": [
+        "value based care",
+        "outcomes based healthcare"
+    ],
+
+    "Digital Therapeutics": [
+        "digital therapeutics",
+        "dtx",
+        "software based treatment"
+    ],
+
+    "Healthcare Cybersecurity": [
+        "healthcare cybersecurity",
+        "patient data security",
+        "hospital cybersecurity"
+    ],
+
+    "Healthcare Interoperability": [
+        "healthcare interoperability",
+        "ehr interoperability",
+        "health data integration",
+        "fhir integration"
+    ],
+
+    "Hospital at Home": [
+        "hospital at home",
+        "home based healthcare",
+        "post acute care technology"
+    ],
+
+    "Personalized Medicine": [
+        "personalized medicine",
+        "precision medicine",
+        "individualized treatment"
+    ],
+
+    "Medical Robotics": [
+        "surgical robotics",
+        "robotic surgery",
+        "medical robotics"
+    ],
+
+    "Oncology & Immunology": [
+        "oncology therapeutics",
+        "immunotherapy",
+        "precision oncology"
+    ],
+
+    "Neuroscience & Neurodegeneration": [
+        "neurodegeneration research",
+        "alzheimer treatment",
+        "neuroscience therapeutics"
+    ],
+
+    "Digital Mental Health": [
+        "digital mental health",
+        "behavioral health platform",
+        "online therapy platform"
+    ],
+
+    # --- INVESTOR SIGNALS / METRICS ---
+
+    "VC Metrics & Signals": [
+        "unit economics",
+        "path to profitability",
+        "capital efficient growth",
+        "net retention",
+        "recurring revenue",
+        "product market fit",
+        "scalable platform",
+        "experienced founders",
+        "strategic partnerships"
+    ]
+}
