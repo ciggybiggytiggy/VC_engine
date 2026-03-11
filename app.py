@@ -489,7 +489,7 @@ def run_pipeline(industry_key: str, scraper_name: str):
 # ------------------------------------------------------------------ #
 with st.sidebar:
     st.markdown("## The C-Note")
-    st.markdown("*VC Deal Flow Intelligence*")
+    st.markdown("*Catherine's Deal Flow Intelligence*")
     st.markdown("---")
 
     INDUSTRIES = {
@@ -497,10 +497,10 @@ with st.sidebar:
         "tech_betalist": ("Tech — BetaList", "tech_betalist"),
         "tech_yc": ("Tech — Y Combinator", "tech_yc"),
         "healthcare": ("Healthcare", "healthcare"),
-        "consumer_retail_fashion": ("Consumer / Retail / Fashion", "consumer_retail_fashion"),
+        "consumer_retail_fashion": ("CPG", "consumer_retail_fashion"),
         "operations_logistics": ("Operations / Logistics", "operations_logistics"),
         "marketing_social": ("Marketing / Social", "marketing_social"),
-        "chicago": ("🏙️ Chicago Startups", "chicago"),
+        "chicago": ("Chicago Startups", "chicago"),
     }
 
     selected_label = st.selectbox(

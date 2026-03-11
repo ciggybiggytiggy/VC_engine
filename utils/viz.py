@@ -17,11 +17,11 @@ AXIS_COLOR = "#5A5650"
 
 PALETTE = [
     "#C9A84C",  # champagne gold
-    "#2ECC8F",  # electric emerald
-    "#E8C97A",  # light champagne
+    "#074025",  # electric emerald
+    "#E8BD4F",  # light champagne
     "#7A9E8A",  # muted sage
     "#B8965A",  # warm bronze
-    "#4DFFA8",  # bright emerald
+    "#074025",  # emerald
     "#8B6E2A",  # dark champagne
     "#A8C4B4",  # cool sage
 ]
