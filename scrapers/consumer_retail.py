@@ -1,77 +1,61 @@
-import requests
-import pandas as pd
-import re
+from scrapers.base import BaseScraper
+from scrapers.api_clients import (
+    hn_show_stories, edgar_form_d_batch, parse_rss_batch,
+    newsapi_search, producthunt_launches, crunchbase_recent_funding, fetch_funding_rss
+)
+from typing import List, Dict
 
-from bs4 import BeautifulSoup
+RETAIL_RSS = [
+    ("https://www.retaildive.com/feeds/news/",               "Retail Dive"),
+    ("https://www.pymnts.com/category/commerce/feed/",       "PYMNTS Commerce"),
+    ("https://techcrunch.com/tag/e-commerce/feed/",          "TechCrunch Ecommerce"),
+    ("https://news.crunchbase.com/feed/",                    "Crunchbase News"),
+]
 
-def extract_company_name(text):
-    """Extract company name from funding-style headlines.
-    
-    - If a funding pattern exists (raises, secures, launches, etc.), return the matched company name.
-    - If no pattern exists, return the full original text.
-    """
-    
-    # common startup headline patterns
-    patterns = [
-        r"^(.*?) raises",
-        r"^(.*?) secures",
-        r"^(.*?) lands",
-        r"^(.*?) closes",
-        r"^(.*?) bags",
-        r"^(.*?) gets",
-        r"^(.*?) launches"
-    ]
+# Expanded — covers DTC, resale, social commerce, sustainability, food/bev
+RETAIL_EDGAR_TERMS = [
+    "ecommerce", "retail", "fashion", "consumer", "marketplace",
+    "direct to consumer", "dtc", "subscription box", "resale",
+    "recommerce", "social commerce", "live shopping", "pop-up",
+    "food delivery", "meal kit", "grocery tech", "beverage",
+    "beauty tech", "personal care", "pet care", "home goods",
+    "sustainable fashion", "circular fashion", "rental fashion",
+    "luxury resale", "sneakers", "streetwear",
+]
 
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()  # return only the company name
-    
-    # fallback: pattern not found, return the full text
-    return text.strip()
+RETAIL_HN_KEYWORDS = [
+    "ecommerce", "shop", "retail", "fashion", "marketplace", "consumer",
+    "brand", "store", "dtc", "subscription", "resale", "recommerce",
+    "social commerce", "checkout", "cart", "dropship",
+]
+
+RETAIL_PH_KEYWORDS = [
+    "shop", "store", "ecommerce", "fashion", "marketplace", "consumer",
+    "brand", "retail", "subscription", "product",
+]
+
+
+class ConsumerRetailScraper(BaseScraper):
+    sector = "Consumer Retail / Fashion / Ecommerce"
+    source_name = "Consumer Retail Scraper"
+
+    def fetch_items(self) -> List[Dict]:
+        items = []
+        items.extend(parse_rss_batch(RETAIL_RSS))
+        items.extend(fetch_funding_rss())
+        items.extend(edgar_form_d_batch(RETAIL_EDGAR_TERMS, days_back=60))
+        for story in hn_show_stories(limit=100):
+            if any(kw in story["description"].lower() for kw in RETAIL_HN_KEYWORDS):
+                items.append(story)
+        items.extend(crunchbase_recent_funding(days_back=30))
+        for launch in producthunt_launches(days_back=14):
+            desc = launch.get("description", "").lower()
+            if any(kw in desc for kw in RETAIL_PH_KEYWORDS):
+                items.append(launch)
+        items.extend(newsapi_search("ecommerce startup seed funding raises DTC"))
+        items.extend(newsapi_search("consumer brand startup pre-seed angel round"))
+        return items
+
 
 def scrape_consumer_retail():
-    """Scrape consumer retail, fashion, and ecommerce startups."""
-    urls = [
-        "https://techcrunch.com/tag/fashion/",
-        "https://techcrunch.com/category/ecommerce/",
-        "https://vcnewsdaily.com/vcsearch.php",
-        "https://dealroom.co",
-        "https://www.fintechfutures.com/bankingtech/retail-banking",
-        "https://www.businessoffashion.com/topics/retail/e-commerce/",
-        "https://www.businessoffashion.com/topics/retail/resale-rental/",
-        "https://www.businessoffashion.com/topics/technology/",
-        "https://www.businessoffashion.com/news/luxury/prada-sales-climb-9-in-2025-as-versace-era-begins/",
-        "https://www.vogue.com/business/sustainability",
-        "https://www.vogue.com/business/fashion",
-        "https://www.vogue.com/business/beauty",
-        "https://www.vogue.com/business/technology"
-    ]
-
-    headers = {"User-Agent": "Mozilla/5.0"}
-    companies = []
-
-    for url in urls:
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            soup = BeautifulSoup(response.text, "html.parser")
-
-            for element in soup.find_all(["h3", "h2", "a"]):
-                name = element.name.strip()
-
-                company_name = extract_company_name(name)
-
-                if name and len(name) > 5:
-                    
-                    company_name = extract_company_name(name)
-
-                    companies.append({
-                        "name": company_name,
-                        "description": name,
-                        "source": "Consumer Retail Scraper",
-                        "sector": "Consumer Retail / Fashion / Ecommerce"
-                    })
-        except Exception as e:
-            pass
-
-    return pd.DataFrame(companies).drop_duplicates(subset=['name'])
+    return ConsumerRetailScraper().run()

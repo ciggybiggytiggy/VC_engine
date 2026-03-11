@@ -1,64 +1,59 @@
-import requests
-import pandas as pd
-import re
+from scrapers.base import BaseScraper
+from scrapers.api_clients import (
+    hn_show_stories, edgar_form_d_batch, parse_rss_batch,
+    newsapi_search, producthunt_launches, crunchbase_recent_funding, fetch_funding_rss
+)
+from typing import List, Dict
 
-from bs4 import BeautifulSoup
+MARKETING_RSS = [
+    ("https://www.marketingdive.com/feeds/news/",            "Marketing Dive"),
+    ("https://techcrunch.com/tag/social/feed/",              "TechCrunch Social"),
+    ("https://news.crunchbase.com/feed/",                    "Crunchbase News"),
+]
 
-def extract_company_name(text):
-    """Extract company name from funding-style headlines.
-    
-    - If a funding pattern exists (raises, secures, launches, etc.), return the matched company name.
-    - If no pattern exists, return the full original text.
-    """
-    
-    # common startup headline patterns
-    patterns = [
-        r"^(.*?) raises",
-        r"^(.*?) secures",
-        r"^(.*?) lands",
-        r"^(.*?) closes",
-        r"^(.*?) bags",
-        r"^(.*?) gets",
-        r"^(.*?) launches"
-    ]
+MARKETING_EDGAR_TERMS = [
+    "marketing", "advertising", "social media", "creator", "influencer",
+    "martech", "adtech", "content marketing", "performance marketing",
+    "affiliate marketing", "programmatic", "connected tv", "ctv",
+    "retail media", "out of home", "ooh advertising", "email marketing",
+    "sms marketing", "loyalty platform", "referral marketing",
+    "brand safety", "identity resolution", "cdp", "customer data platform",
+    "attribution", "measurement", "analytics platform",
+]
 
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()  # return only the company name
-    
-    # fallback: pattern not found, return the full text
-    return text.strip()
+MARKETING_HN_KEYWORDS = [
+    "marketing", "social media", "creator", "influencer", "ads",
+    "brand", "content", "saas", "martech", "adtech", "newsletter",
+    "community", "audience", "growth",
+]
+
+MARKETING_PH_KEYWORDS = [
+    "marketing", "social", "creator", "content", "analytics",
+    "email", "newsletter", "community", "brand", "growth",
+]
+
+
+class MarketingSocialScraper(BaseScraper):
+    sector = "Marketing / Social"
+    source_name = "Marketing Social Scraper"
+
+    def fetch_items(self) -> List[Dict]:
+        items = []
+        items.extend(parse_rss_batch(MARKETING_RSS))
+        items.extend(fetch_funding_rss())
+        items.extend(edgar_form_d_batch(MARKETING_EDGAR_TERMS, days_back=60))
+        for story in hn_show_stories(limit=100):
+            if any(kw in story["description"].lower() for kw in MARKETING_HN_KEYWORDS):
+                items.append(story)
+        items.extend(crunchbase_recent_funding(days_back=30))
+        for launch in producthunt_launches(days_back=14):
+            desc = launch.get("description", "").lower()
+            if any(kw in desc for kw in MARKETING_PH_KEYWORDS):
+                items.append(launch)
+        items.extend(newsapi_search("martech adtech startup seed funding raises"))
+        items.extend(newsapi_search("creator economy social media startup pre-seed"))
+        return items
+
 
 def scrape_marketing_social():
-    """Scrape marketing and social media startups."""
-    urls = [
-        "https://techcrunch.com/tag/social-media/",
-        "https://techcrunch.com/tag/marketing/",
-        "https://vcnewsdaily.com/vcsearch.php"
-    ]
-    headers = {"User-Agent": "Mozilla/5.0"}
-    companies = []
-
-    for url in urls:
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            soup = BeautifulSoup(response.text, "html.parser")
-
-            for element in soup.find_all(["h3", "h2", "a"]):
-                name = element.text.strip()
-                
-                if name and len(name) > 2:
-
-                    company_name = extract_company_name(name) 
-                    
-                    companies.append({
-                        "name": company_name,
-                        "description": name,
-                        "source": "Marketing Social Scraper",
-                        "sector": "Marketing / Social"
-                    })
-        except Exception as e:
-            pass
-
-    return pd.DataFrame(companies).drop_duplicates(subset=['name'])
+    return MarketingSocialScraper().run()

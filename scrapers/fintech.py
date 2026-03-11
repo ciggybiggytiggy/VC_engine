@@ -1,68 +1,75 @@
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
+from scrapers.base import BaseScraper
+from scrapers.api_clients import (
+    hn_show_stories, edgar_form_d_batch, parse_rss_batch,
+    newsapi_search, producthunt_launches, crunchbase_recent_funding, fetch_funding_rss
+)
+from typing import List, Dict
 
-import re
+FINTECH_RSS = [
+    ("https://www.pymnts.com/feed/",                     "PYMNTS"),
+    ("https://www.fintechfutures.com/feed/",             "Fintech Futures"),
+    ("https://www.finsmes.com/feed",                     "FinSMEs Funding"),
+    ("https://techcrunch.com/tag/fintech/feed/",         "TechCrunch Fintech"),
+    ("https://news.crunchbase.com/feed/",                "Crunchbase News"),
+]
 
-def extract_company_name(text):
-    """Extract company name from funding-style headlines.
-    
-    - If a funding pattern exists (raises, secures, launches, etc.), return the matched company name.
-    - If no pattern exists, return the full original text.
-    """
-    
-    # common startup headline patterns
-    patterns = [
-        r"^(.*?) raises",
-        r"^(.*?) secures",
-        r"^(.*?) lands",
-        r"^(.*?) closes",
-        r"^(.*?) bags",
-        r"^(.*?) gets",
-        r"^(.*?) launches"
-    ]
+# Expanded from 5 → 25 terms covering every fintech niche
+FINTECH_EDGAR_TERMS = [
+    "fintech", "payments", "neobank", "insurtech", "wealthtech",
+    "regtech", "lendtech", "proptech", "paytech", "banktech",
+    "digital banking", "open banking", "embedded finance", "crypto",
+    "defi", "blockchain payments", "b2b payments", "cross-border",
+    "remittance", "credit scoring", "buy now pay later", "bnpl",
+    "robo-advisor", "invoice financing", "treasury management",
+]
 
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()  # return only the company name
-    
-    # fallback: pattern not found, return the full text
-    return text.strip()
+FINTECH_HN_KEYWORDS = [
+    "fintech", "payment", "banking", "neobank", "stripe", "plaid",
+    "lending", "insurance", "crypto", "defi", "embedded finance",
+    "treasury", "invoice", "payroll", "remittance",
+]
+
+FINTECH_PH_KEYWORDS = [
+    "finance", "payments", "banking", "investing", "crypto", "insurance",
+]
+
+
+class FintechScraper(BaseScraper):
+    sector = "Fintech"
+    source_name = "Fintech Scraper"
+
+    def fetch_items(self) -> List[Dict]:
+        items = []
+
+        # 1. Funding-specific RSS
+        items.extend(parse_rss_batch(FINTECH_RSS))
+
+        # 2. Global funding RSS (Crunchbase News, TechCrunch Funding etc.)
+        items.extend(fetch_funding_rss())
+
+        # 3. EDGAR Form D — 25 terms, 60-day window
+        items.extend(edgar_form_d_batch(FINTECH_EDGAR_TERMS, days_back=60))
+
+        # 4. HN Show HN
+        for story in hn_show_stories(limit=100):
+            if any(kw in story["description"].lower() for kw in FINTECH_HN_KEYWORDS):
+                items.append(story)
+
+        # 5. Crunchbase (if key set)
+        items.extend(crunchbase_recent_funding(days_back=30))
+
+        # 6. Product Hunt (if token set)
+        for launch in producthunt_launches(days_back=14):
+            desc = launch.get("description", "").lower()
+            if any(kw in desc for kw in FINTECH_PH_KEYWORDS):
+                items.append(launch)
+
+        # 7. NewsAPI
+        items.extend(newsapi_search("fintech startup seed funding raised series"))
+        items.extend(newsapi_search("payments startup pre-seed angel round"))
+
+        return items
+
 
 def scrape_fintech():
-    """Scrape fintech startups across multiple sources."""
-    urls = [
-        "https://techcrunch.com/category/fintech/",
-        "https://www.fintechfutures.com/wealthtech/alternative-investment-platforms",
-        "https://www.fintechfutures.com/fintech/fintech-start-ups",
-        "https://www.fintechfutures.com/fintech/m-a",
-        "https://www.fintechfutures.com/bankingtech/digital-banking",
-        "https://www.finsmes.com",
-        "https://www.crunchbase.com/discover/organization.companies?mollie_params=%7B%22f_categories%22:%22fintech%22%7D"
-    ]
-    headers = {"User-Agent": "Mozilla/5.0"}
-    companies = []
-
-    for url in urls:
-        try:
-            response = requests.get(url, headers=headers, timeout=10)
-            soup = BeautifulSoup(response.text, "html.parser")
-
-            for element in soup.find_all(["h3", "h2", "a"]):
-                name = element.text.strip()
-                
-                if name and len(name) > 2:
-
-                    company_name = extract_company_name(name) 
-                    
-                    companies.append({
-                        "name": company_name,
-                        "description": name,
-                        "source": "Fintech Scraper",
-                        "sector": "Fintech"
-                    })
-        except Exception as e:
-            pass
-
-    return pd.DataFrame(companies).drop_duplicates(subset=['name'])
+    return FintechScraper().run()
