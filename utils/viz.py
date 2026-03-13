@@ -1,42 +1,42 @@
 """
-Chart generation utilities — Obsidian & Champagne theme.
-All figures use a dark obsidian background with champagne gold accents
-and electric emerald for data signals.
+Chart generation utilities — Maison Capital theme.
+Bone white background, ink black axes, lacquer red accents.
+Broadsheet-meets-Bloomberg aesthetic.
 """
 
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-PLOT_BG    = "#141416"
-PAPER_BG   = "#141416"
-TEXT_COLOR = "#F5F0E8"
-MUTED      = "#9A9490"
-GRID_COLOR = "#2A2A30"
-AXIS_COLOR = "#5A5650"
+PLOT_BG    = "#FAFAF8"
+PAPER_BG   = "#FAFAF8"
+TEXT_COLOR = "#0A0A0A"
+MUTED      = "#8A8480"
+GRID_COLOR = "#E8E0D4"
+AXIS_COLOR = "#4A4A4A"
 
 PALETTE = [
-    "#C9A84C",  # champagne gold
-    "#074025",  # electric emerald
-    "#E8BD4F",  # light champagne
-    "#7A9E8A",  # muted sage
-    "#B8965A",  # warm bronze
-    "#074025",  # emerald
-    "#8B6E2A",  # dark champagne
-    "#A8C4B4",  # cool sage
+    "#0A0A0A",   # ink
+    "#C41E2A",   # lacquer
+    "#4A4A4A",   # graphite
+    "#8A8480",   # dust
+    "#B8B4AE",   # fog
+    "#A09890",   # rule-strong
+    "#2C2C2C",   # ink-muted
+    "#D4CEC6",   # rule
 ]
 
 def _base_layout(title: str) -> dict:
     return dict(
         title=dict(
             text=title.upper(),
-            font=dict(color=MUTED, size=9, family="Figtree"),
+            font=dict(color=MUTED, size=8, family="Montserrat"),
             x=0,
             xanchor="left",
         ),
         plot_bgcolor=PLOT_BG,
         paper_bgcolor=PAPER_BG,
-        font=dict(color=TEXT_COLOR, family="Figtree", size=11),
+        font=dict(color=TEXT_COLOR, family="Montserrat", size=11),
         margin=dict(l=20, r=20, t=44, b=20),
     )
 
@@ -54,16 +54,16 @@ def make_market_map(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         **_base_layout("Market Map"),
         legend=dict(
-            bgcolor="rgba(28,28,32,0.9)",
-            bordercolor="#2A2A30",
+            bgcolor="rgba(250,250,248,0.95)",
+            bordercolor=GRID_COLOR,
             borderwidth=1,
             font=dict(color=TEXT_COLOR, size=10),
             title=dict(text="SECTOR", font=dict(color=MUTED, size=8)),
         ),
         xaxis=dict(gridcolor=GRID_COLOR, color=AXIS_COLOR, zerolinecolor=GRID_COLOR,
-                   tickfont=dict(color=MUTED)),
+                   tickfont=dict(color=MUTED), showline=True, linecolor=GRID_COLOR),
         yaxis=dict(gridcolor=GRID_COLOR, color=AXIS_COLOR, zerolinecolor=GRID_COLOR,
-                   tickfont=dict(color=MUTED)),
+                   tickfont=dict(color=MUTED), showline=True, linecolor=GRID_COLOR),
     )
     fig.update_traces(marker=dict(line=dict(width=0.5, color=PLOT_BG)))
     return fig
@@ -80,10 +80,12 @@ def make_deal_flow_bar(df_radar: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         **_base_layout("Deal Flow Radar"),
         yaxis=dict(autorange="reversed", gridcolor=GRID_COLOR,
-                   tickfont=dict(color=TEXT_COLOR, size=10), color=TEXT_COLOR),
-        xaxis=dict(gridcolor=GRID_COLOR, tickfont=dict(color=MUTED), color=AXIS_COLOR),
+                   tickfont=dict(color=TEXT_COLOR, size=10), color=TEXT_COLOR,
+                   showline=True, linecolor=GRID_COLOR),
+        xaxis=dict(gridcolor=GRID_COLOR, tickfont=dict(color=MUTED), color=AXIS_COLOR,
+                   showline=True, linecolor=GRID_COLOR),
         legend=dict(
-            bgcolor="rgba(28,28,32,0.9)", bordercolor="#2A2A30", borderwidth=1,
+            bgcolor="rgba(250,250,248,0.95)", bordercolor=GRID_COLOR, borderwidth=1,
             font=dict(color=TEXT_COLOR, size=9),
             title=dict(text="PREDICTED INVESTOR", font=dict(color=MUTED, size=8)),
         ),
@@ -97,10 +99,10 @@ def make_heatmap(heatmap_df: pd.DataFrame) -> go.Figure:
     fig = px.imshow(
         heatmap_df,
         color_continuous_scale=[
-            [0,   "#141416"],
-            [0.3, "#2A2218"],
-            [0.6, "#6B4E1A"],
-            [1.0, "#C9A84C"],
+            [0,   "#F2EDE4"],
+            [0.3, "#E8D4D0"],
+            [0.6, "#D4818A"],
+            [1.0, "#C41E2A"],
         ],
         aspect="auto",
         labels=dict(x="VC Fund", y="Startup", color="Likelihood"),
@@ -141,13 +143,13 @@ def make_stage_donut(df: pd.DataFrame) -> go.Figure:
         showlegend=True,
         legend=dict(
             font=dict(color=TEXT_COLOR, size=10),
-            bgcolor="rgba(28,28,32,0.9)",
-            bordercolor="#2A2A30",
+            bgcolor="rgba(250,250,248,0.95)",
+            bordercolor=GRID_COLOR,
             borderwidth=1,
         ),
         annotations=[dict(
             text="STAGE", x=0.5, y=0.5,
-            font=dict(size=9, color=MUTED, family="Figtree"),
+            font=dict(size=8, color=MUTED, family="Montserrat"),
             showarrow=False,
         )],
     )
@@ -172,15 +174,16 @@ def make_trend_bar(df: pd.DataFrame) -> go.Figure:
     fig.update_layout(
         **_base_layout("Trending Themes"),
         yaxis=dict(autorange="reversed", tickfont=dict(color=TEXT_COLOR, size=10),
-                   color=TEXT_COLOR, gridcolor=GRID_COLOR),
-        xaxis=dict(tickfont=dict(color=MUTED), color=AXIS_COLOR, gridcolor=GRID_COLOR),
+                   color=TEXT_COLOR, gridcolor=GRID_COLOR, showline=True, linecolor=GRID_COLOR),
+        xaxis=dict(tickfont=dict(color=MUTED), color=AXIS_COLOR, gridcolor=GRID_COLOR,
+                   showline=True, linecolor=GRID_COLOR),
         bargap=0.3,
     )
     fig.update_traces(
         marker=dict(
-            color=PALETTE[0],
+            color=PALETTE[1],   # lacquer red
             line=dict(color=PLOT_BG, width=0),
-            opacity=0.85,
+            opacity=0.9,
         )
     )
     return fig
