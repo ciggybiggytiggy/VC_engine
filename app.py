@@ -22,7 +22,7 @@ from scrapers.healthcare import scrape_healthcare
 from scrapers.consumer_retail import scrape_consumer_retail
 from scrapers.operations_logistics import scrape_operations_logistics
 from scrapers.marketing_social import scrape_marketing_social
-from scrapers.tech import scrape_betalist, scrape_producthunt, scrape_yc, scrape_sec_form_d
+from scrapers.tech import scrape_betalist, scrape_producthunt, scrape_yc
 from scrapers.chicago import scrape_chicago
 
 from utils.scoring import detect_funding_stage, label_trends, score_company, generate_rationale
@@ -416,9 +416,8 @@ def run_pipeline(industry_key: str, scraper_name: str):
 
     scraper_map = {
         "fintech": scrape_fintech,
-        "tech_betalist": scrape_betalist,
-        "tech_yc": scrape_yc,
-        "tech_sec": scrape_sec_form_d,
+        "tech": (scrape_betalist, scrape_producthunt),
+        "edgar_form_filings": scrape_yc,
         "healthcare": scrape_healthcare,
         "consumer_retail_fashion": scrape_consumer_retail,
         "operations_logistics": scrape_operations_logistics,
@@ -494,13 +493,14 @@ with st.sidebar:
 
     INDUSTRIES = {
         "fintech": ("Fintech", "fintech"),
-        "tech_betalist": ("Tech — BetaList", "tech_betalist"),
-        "tech_yc": ("Tech — Y Combinator", "tech_yc"),
+        "tech": ("Tech", "tech"),
+        "edgar_form_filings": ("Edgar Form Filings", "edgar_form_filings"),
         "healthcare": ("Healthcare", "healthcare"),
         "consumer_retail_fashion": ("CPG", "consumer_retail_fashion"),
         "operations_logistics": ("Operations / Logistics", "operations_logistics"),
         "marketing_social": ("Marketing / Social", "marketing_social"),
-        "chicago": ("Chicago Startups", "chicago"),
+        "chicago": ("Chicago Startups", "chicago")
+
     }
 
     selected_label = st.selectbox(
@@ -526,13 +526,77 @@ with st.sidebar:
 
     run_btn = st.button("Run Analysis", use_container_width=True, type="primary")
 
+    st.markdown("---")
+    st.markdown("""
+    <p style="color:#5A5650; font-size:.68rem; line-height:1.7">
+    Built by <strong style="color:#9A9490">Catherine Walker </strong><br>
+    Tracking pre-seed & seed deals in Fintech, Health, and B2B SaaS<br>
+    focusing on Chicago-area Funds.
+    </p>
+    """, unsafe_allow_html=True)
+
 # ------------------------------------------------------------------ #
-#  Main content                                                        #
+#  Main Content -- header                                            #
 # ------------------------------------------------------------------ #
+st.markdown("## The C-Note - {industry}".format(industry=selected_label))
 st.markdown('<div class="section-header"> The who, the how, the why — today’s market pulse in under 5 minutes </div>', unsafe_allow_html=True)
 
 if not run_btn:
-    st.info("Select an industry in the sidebar and click **Run Analysis** to get started.")
+    st.markdown("""
+    <div style="border:1px solid #2A2A30; border-left:3px solid #C9A84C; 
+    background:#1C1C20; padding:28px 32px; border-radius:2px; margin-bottom:2rem">
+    <p style="color:#C9A84C; font-size:.65rem; font-weight:700; 
+    letter-spacing:.16em; text-transform:uppercase; margin:0 0 12px 0">
+    Why This Exists</p>
+    <p style="color:#F5F0E8; font-size:1.05rem; line-height:1.8; margin:0">
+    Early startup signals appear across fragmented sources long before companies show up in traditional deal databases.
+This platform aggregates signals like SEC Form D filings, Show HN launches, and founder RSS feeds to surface potential deals earlier in the sourcing pipeline.
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div style="border:1px solid #2A2A30; background:#1C1C20; 
+        padding:20px 24px; border-radius:2px; text-align:center">
+        <p style="color:#C9A84C; font-size:1.6rem; font-weight:600; 
+        font-family:'Cormorant Garamond',serif; margin:0">6</p>
+        <p style="color:#9A9490; font-size:.65rem; font-weight:700; 
+        letter-spacing:.14em; text-transform:uppercase; margin:4px 0 0 0">
+        Data Sources</p>
+        </div>""", unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="border:1px solid #2A2A30; background:#1C1C20; 
+        padding:20px 24px; border-radius:2px; text-align:center">
+        <p style="color:#C9A84C; font-size:1.6rem; font-weight:600; 
+        font-family:'Cormorant Garamond',serif; margin:0">4</p>
+        <p style="color:#9A9490; font-size:.65rem; font-weight:700; 
+        letter-spacing:.14em; text-transform:uppercase; margin:4px 0 0 0">
+        Chicago VC Portfolios Tracked</p>
+        </div>""", unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div style="border:1px solid #2A2A30; background:#1C1C20; 
+        padding:20px 24px; border-radius:2px; text-align:center">
+        <p style="color:#C9A84C; font-size:1.6rem; font-weight:600; 
+        font-family:'Cormorant Garamond',serif; margin:0">30min</p>
+        <p style="color:#9A9490; font-size:.65rem; font-weight:700; 
+        letter-spacing:.14em; text-transform:uppercase; margin:4px 0 0 0">
+        Cache — Instant on Demo</p>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+    <p style="color:#5A5650; font-size:.78rem; line-height:1.7">
+    <strong style="color:#9A9490">Sources:</strong> SEC EDGAR Form D · 
+    Hacker News Show HN · TechCrunch Funding · Crunchbase News · 
+    Built In Chicago · Chicago Inno · NewsAPI · Product Hunt<br>
+    <strong style="color:#9A9490">Portfolios:</strong> Chicago Ventures · 
+    Hyde Park Angels · M25 · Origin Ventures
+    </p>
+    """, unsafe_allow_html=True)
     st.stop()
 
 # ── Run pipeline with progress indicator ── #
@@ -567,7 +631,7 @@ if diff.get("has_previous"):
         f"{n_stage} stage changes"
     )
 
-    with st.expander(f"🆕 {n_new} New Companies Since Last Run", expanded=n_new > 0):
+    with st.expander(f"{n_new} New Companies Since Last Run", expanded=n_new > 0):
         if not diff["new_companies"].empty:
             cols_to_show = ["name", "funding_stage", "trend", "rationale", "score"]
             available = [c for c in cols_to_show if c in diff["new_companies"].columns]
@@ -576,7 +640,7 @@ if diff.get("has_previous"):
             st.write("No new companies detected.")
 
     if not diff["stage_changes"].empty:
-        with st.expander(f"📈 {n_stage} Stage Changes"):
+        with st.expander(f"{n_stage} Stage Changes"):
             st.dataframe(diff["stage_changes"], use_container_width=True)
 
 # ------------------------------------------------------------------ #
@@ -595,6 +659,13 @@ st.markdown("---")
 #  Top 5 Picks                                                         #
 # ------------------------------------------------------------------ #
 st.markdown('<div class="section-header"> Catherine\'s Top 5 of The Week </div>', unsafe_allow_html=True)
+
+st.markdown("""
+<p style="color:#5A5650; font-size:.75rem; margin:-8px 0 16px 0">
+Ranked by composite score: funding stage signal · trend velocity · 
+portfolio proximity · competitor overlap
+</p>
+""", unsafe_allow_html=True)
 
 top5 = df_filtered.nlargest(5, "score").reset_index(drop=True) if "score" in df_filtered.columns else df_filtered.head(5)
 

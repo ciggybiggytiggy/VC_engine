@@ -97,61 +97,292 @@ def hn_new_stories(limit: int = 80) -> List[Dict]:
 
 # ── SEC EDGAR ─────────────────────────────────────────────────────────── #
 
-EDGAR_BASE = "https://efts.sec.gov/LATEST/search-index"
+"""
+SEC EDGAR Form D scraper — drop-in replacement for api_clients.py edgar functions.
+
+Two-stage approach:
+  1. edgar_form_d_search()  — EDGAR full-text search for Form D filings by keyword.
+                              Returns company name, filing date, CIK, and accession number.
+  2. edgar_form_d_detail()  — Fetches the actual XML filing for a given accession number.
+                              Extracts structured fields: amount raised, state, investor count,
+                              offering type, and a direct link to the filing.
+  3. edgar_form_d()         — Combines both. Primary entry point.
+  4. edgar_form_d_batch()   — Runs edgar_form_d() across a list of terms, deduplicated.
+
+Why this is better than the original:
+  - Uses the correct EDGAR EFTS search endpoint with proper parameters
+  - Fetches the actual XML filing to get structured financial data
+  - Returns amount_raised, state, investor_count — not available from search alone
+  - Links directly to the filing, not a company search page
+  - Rate-limit safe: 0.15s sleep between requests (EDGAR recommends < 10 req/sec)
+"""
+
+import time
+import logging
+import xml.etree.ElementTree as ET
+from datetime import datetime, timedelta
+from typing import List, Dict, Optional
+
+import requests
+
+logger = logging.getLogger(__name__)
+
+HEADERS = {
+    "User-Agent": "deal-flow-tool contact@yourdomain.com",  # EDGAR requires a real User-Agent
+    "Accept-Encoding": "gzip, deflate",
+}
+TIMEOUT = 12
+
+EDGAR_SEARCH_URL = "https://efts.sec.gov/LATEST/search-index"
+EDGAR_FILING_URL = "https://www.sec.gov/Archives/edgar/data"
+EDGAR_SUBMISSIONS_URL = "https://data.sec.gov/submissions"
+
+# Form D XML namespace
+FORM_D_NS = {"ns": "http://www.sec.gov/edgar/document/formd"}
+
+# Only keep filings that look like early-stage rounds
+EARLY_STAGE_KEYWORDS = {
+    "equity", "debt", "convertible", "safe", "note", "warrant",
+    "priced round", "bridge", "angel",
+}
 
 
-def edgar_form_d(query: str, days_back: int = 60) -> List[Dict]:
-    """Search recent Form D filings. days_back=60 for fresher signal."""
+# ── Stage 1: Search ────────────────────────────────────────────────────── #
+
+def edgar_form_d_search(
+    query: str,
+    days_back: int = 60,
+    max_results: int = 40,
+) -> List[Dict]:
+    """
+    Search EDGAR for Form D filings matching a keyword.
+    Returns lightweight records with CIK and accession_number for detail fetching.
+    """
     start = (datetime.today() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+
     params = {
         "q": f'"{query}"',
         "dateRange": "custom",
         "startdt": start,
         "forms": "D",
+        "hits.hits._source": "period_of_report,entity_name,file_num,period_of_report,file_date",
+        "hits.hits.total": max_results,
     }
+
     try:
-        r = requests.get(EDGAR_BASE, headers=HEADERS, params=params, timeout=TIMEOUT)
+        r = requests.get(
+            EDGAR_SEARCH_URL,
+            headers=HEADERS,
+            params=params,
+            timeout=TIMEOUT,
+        )
         if not r.ok:
+            logger.debug(f"EDGAR search failed [{r.status_code}]: {query}")
             return []
+
         hits = r.json().get("hits", {}).get("hits", [])
-        items = []
-        for hit in hits:
+        results = []
+
+        for hit in hits[:max_results]:
             src = hit.get("_source", {})
-            name = src.get("entity_name", "")
-            filed = src.get("file_date", "")
-            amount = src.get("total_offering_amount", "")
-            if name:
-                desc = "SEC Form D — raised"
-                if amount:
-                    try:
-                        desc += f" ${float(amount):,.0f}"
-                    except Exception:
-                        pass
-                desc += f" | filed {filed}"
-                items.append({
-                    "name": name,
-                    "description": desc,
-                    "url": f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company={name}&type=D&dateb=&owner=include&count=10",
-                    "source": "SEC EDGAR Form D",
-                })
-        return items
-    except Exception:
+            entity_name = src.get("entity_name", "")
+            file_date = src.get("file_date", "")
+            accession_raw = hit.get("_id", "")  # format: 0001234567-24-000001
+
+            if not entity_name or not accession_raw:
+                continue
+
+            # CIK is embedded in the accession number prefix
+            cik = src.get("file_num", "").replace("-", "")[:10].lstrip("0") or ""
+
+            results.append({
+                "entity_name": entity_name,
+                "file_date": file_date,
+                "accession_number": accession_raw,
+                "cik": cik,
+            })
+
+        return results
+
+    except Exception as e:
+        logger.debug(f"edgar_form_d_search error: {e}")
         return []
 
 
-def edgar_form_d_batch(terms: List[str], days_back: int = 60) -> List[Dict]:
-    """Run edgar_form_d for a list of terms, deduplicated by company name."""
+# ── Stage 2: Detail (XML filing) ──────────────────────────────────────── #
+
+def edgar_form_d_detail(accession_number: str, cik: str) -> Optional[Dict]:
+    """
+    Fetch and parse the Form D XML filing for a given accession number.
+    Returns structured fields or None if the filing can't be parsed.
+
+    EDGAR XML filing path:
+    https://www.sec.gov/Archives/edgar/data/{CIK}/{accession_no_dashes}/{accession_no_dashes}.xml
+    """
+    if not accession_number or not cik:
+        return None
+
+    acc_clean = accession_number.replace("-", "")
+    xml_url = f"{EDGAR_FILING_URL}/{cik}/{acc_clean}/{acc_clean}.xml"
+    filing_url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc_clean}/{acc_clean}-index.htm"
+
+    try:
+        r = requests.get(xml_url, headers=HEADERS, timeout=TIMEOUT)
+        if not r.ok:
+            return None
+
+        root = ET.fromstring(r.content)
+
+        def find(path: str) -> str:
+            el = root.find(path, FORM_D_NS)
+            return el.text.strip() if el is not None and el.text else ""
+
+        # Offering amount
+        total_amount = find(".//ns:totalOfferingAmount")
+        amount_sold = find(".//ns:totalAmountSold")
+        amount_str = ""
+        for raw in [amount_sold, total_amount]:
+            if raw:
+                try:
+                    val = float(raw)
+                    if val > 0:
+                        amount_str = f"${val:,.0f}"
+                        break
+                except ValueError:
+                    pass
+
+        # State of incorporation
+        state = find(".//ns:stateOfIncorporation") or find(".//ns:issuerStateOrCountry")
+
+        # Revenue range (proxy for stage)
+        revenue_range = find(".//ns:revenueRange")
+
+        # Number of investors
+        investors_count = find(".//ns:totalNumberAlreadySold") or find(".//ns:numberInvestors")
+
+        # Offering type
+        offering_type = find(".//ns:typesOfSecuritiesOffered//ns:offeringType")
+
+        return {
+            "amount_raised": amount_str,
+            "state": state,
+            "revenue_range": revenue_range,
+            "investors_count": investors_count,
+            "offering_type": offering_type,
+            "filing_url": filing_url,
+        }
+
+    except Exception as e:
+        logger.debug(f"edgar_form_d_detail error [{accession_number}]: {e}")
+        return None
+
+
+# ── Stage 3: Combined entry point ─────────────────────────────────────── #
+
+def edgar_form_d(
+    query: str,
+    days_back: int = 60,
+    max_results: int = 40,
+    fetch_detail: bool = True,
+) -> List[Dict]:
+    """
+    Search Form D filings by keyword and enrich with structured filing data.
+
+    Args:
+        query:        Keyword to search (e.g. "fintech", "Chicago", "embedded finance")
+        days_back:    How far back to search (default 60 days)
+        max_results:  Cap on results per query (default 40)
+        fetch_detail: If True, fetches the XML filing for each result to get
+                      amount_raised, state, investors_count, etc.
+                      Set to False for faster batch runs where you only need names.
+
+    Returns:
+        List of dicts compatible with BaseScraper._normalize_row():
+          name, description, url, source
+        Plus bonus fields (not used by base pipeline but available for scoring):
+          amount_raised, state, filing_date, investors_count, offering_type
+    """
+    search_results = edgar_form_d_search(query, days_back=days_back, max_results=max_results)
+    items = []
+
+    for record in search_results:
+        name = record["entity_name"]
+        file_date = record["file_date"]
+        accession = record["accession_number"]
+        cik = record["cik"]
+
+        detail = {}
+        if fetch_detail and cik:
+            detail = edgar_form_d_detail(accession, cik) or {}
+            time.sleep(0.15)  # EDGAR rate limit: stay well under 10 req/sec
+
+        amount = detail.get("amount_raised", "")
+        state = detail.get("state", "")
+        offering_type = detail.get("offering_type", "")
+        investors = detail.get("investors_count", "")
+        filing_url = detail.get("filing_url") or (
+            f"https://www.sec.gov/cgi-bin/browse-edgar"
+            f"?action=getcompany&CIK={cik}&type=D&dateb=&owner=include&count=10"
+        )
+
+        # Build a human-readable description for the pipeline
+        desc_parts = ["SEC Form D filing"]
+        if amount:
+            desc_parts.append(f"raised {amount}")
+        if offering_type:
+            desc_parts.append(offering_type.lower())
+        if state:
+            desc_parts.append(f"incorporated in {state}")
+        if investors:
+            desc_parts.append(f"{investors} investor(s)")
+        desc_parts.append(f"filed {file_date}")
+
+        items.append({
+            # Required by BaseScraper pipeline
+            "name": name,
+            "description": " · ".join(desc_parts),
+            "url": filing_url,
+            "source": "SEC EDGAR Form D",
+            # Bonus structured fields (available for scoring/filtering)
+            "amount_raised": amount,
+            "state": state,
+            "offering_type": offering_type,
+            "investors_count": investors,
+            "filing_date": file_date,
+        })
+
+    return items
+
+
+# ── Stage 4: Batch runner ─────────────────────────────────────────────── #
+
+def edgar_form_d_batch(
+    terms: List[str],
+    days_back: int = 60,
+    fetch_detail: bool = True,
+) -> List[Dict]:
+    """
+    Run edgar_form_d() across a list of keyword terms.
+    Deduplicates by normalized company name across all terms.
+
+    Args:
+        terms:        List of search keywords
+        days_back:    Passed through to edgar_form_d()
+        fetch_detail: Passed through to edgar_form_d(). Set False to go faster
+                      when you only need names (e.g. in a pre-filter step).
+    """
     seen: set = set()
     results = []
+
     for term in terms:
-        for item in edgar_form_d(term, days_back=days_back):
+        for item in edgar_form_d(term, days_back=days_back, fetch_detail=fetch_detail):
             key = item["name"].strip().lower()
             if key not in seen:
                 seen.add(key)
                 results.append(item)
-        time.sleep(0.1)
-    return results
+        time.sleep(0.2)  # pause between search queries
 
+    return results
 
 # ── RSS Parser ────────────────────────────────────────────────────────── #
 

@@ -58,14 +58,6 @@ class YCScraper(BaseScraper):
         return items
 
 
-class SECFormDScraper(BaseScraper):
-    sector = "Startup"
-    source_name = "SEC EDGAR Form D"
-
-    def fetch_items(self) -> List[Dict]:
-        return edgar_form_d_batch(SEC_EARLY_TERMS, days_back=30)
-
-
 def scrape_betalist():
     return BetaListScraper().run()
 
@@ -74,6 +66,3 @@ def scrape_producthunt():
 
 def scrape_yc():
     return YCScraper().run()
-
-def scrape_sec_form_d():
-    return SECFormDScraper().run()
