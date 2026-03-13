@@ -122,8 +122,8 @@ class BuiltInChicagoScraper(BaseScraper):
         items.extend(parse_rss_batch(CHICAGO_RSS))
 
         # EDGAR — primary Chicago source, real SEC Form D filings
-        items.extend(edgar_form_d_batch(CHICAGO_GEO_TERMS, days_back=60))
-        items.extend(edgar_form_d_batch(CHICAGO_INDUSTRY_TERMS, days_back=60))
+        items.extend(edgar_form_d_batch(CHICAGO_GEO_TERMS, days_back=30))
+        items.extend(edgar_form_d_batch(CHICAGO_INDUSTRY_TERMS, days_back=30))
 
         # NewsAPI — queries explicitly include "Chicago" or "Illinois"
         items.extend(newsapi_search("Chicago startup funding raised seed"))

@@ -48,7 +48,7 @@ class YCScraper(BaseScraper):
     def fetch_items(self) -> List[Dict]:
         items = []
         items.extend(hn_new_stories(limit=100))
-        items.extend(edgar_form_d_batch(TECH_EDGAR_TERMS, days_back=60))
+        items.extend(edgar_form_d_batch(TECH_EDGAR_TERMS, days_back=30))
         items.extend(parse_rss_batch(TECH_RSS))
         items.extend(fetch_funding_rss())
         items.extend(crunchbase_recent_funding(days_back=30))

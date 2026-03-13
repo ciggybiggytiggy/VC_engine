@@ -43,7 +43,10 @@ HN_BASE = "https://hacker-news.firebaseio.com/v0"
 
 
 def hn_show_stories(limit: int = 60) -> List[Dict]:
-    """Fetch Show HN posts — founders announcing their own products."""
+    """Fetch Show HN posts — founders announcing their own products.
+    Drops items older than MAX_ITEM_AGE_DAYS days using HN's Unix timestamp."""
+    cutoff_ts = (datetime.utcnow() - timedelta(days=MAX_ITEM_AGE_DAYS)).timestamp()
+
     r = requests.get(f"{HN_BASE}/showstories.json", headers=HEADERS, timeout=TIMEOUT)
     if not r.ok:
         return []
@@ -54,6 +57,9 @@ def hn_show_stories(limit: int = 60) -> List[Dict]:
             sr = requests.get(f"{HN_BASE}/item/{story_id}.json", headers=HEADERS, timeout=TIMEOUT)
             if sr.ok:
                 data = sr.json()
+                # Drop items older than 30 days
+                if data.get("time", 0) < cutoff_ts:
+                    continue
                 title = data.get("title", "")
                 if title.lower().startswith("show hn"):
                     clean = title.replace("Show HN:", "").replace("Show HN: ", "").strip()
@@ -70,7 +76,9 @@ def hn_show_stories(limit: int = 60) -> List[Dict]:
 
 
 def hn_new_stories(limit: int = 80) -> List[Dict]:
-    """Fetch newest HN stories."""
+    """Fetch newest HN stories, dropping items older than MAX_ITEM_AGE_DAYS days."""
+    cutoff_ts = (datetime.utcnow() - timedelta(days=MAX_ITEM_AGE_DAYS)).timestamp()
+
     r = requests.get(f"{HN_BASE}/newstories.json", headers=HEADERS, timeout=TIMEOUT)
     if not r.ok:
         return []
@@ -81,6 +89,9 @@ def hn_new_stories(limit: int = 80) -> List[Dict]:
             sr = requests.get(f"{HN_BASE}/item/{story_id}.json", headers=HEADERS, timeout=TIMEOUT)
             if sr.ok:
                 data = sr.json()
+                # Drop items older than 30 days
+                if data.get("time", 0) < cutoff_ts:
+                    continue
                 title = data.get("title", "")
                 if title:
                     items.append({
@@ -99,10 +110,11 @@ def hn_new_stories(limit: int = 80) -> List[Dict]:
 # ─────────────────────────────────────────────────────────────────── #
 
 EDGAR_SEARCH_URL = "https://efts.sec.gov/LATEST/search-index"
-def edgar_form_d(query: str, days_back: int = 60) -> List[Dict]:
+def edgar_form_d(query: str, days_back: int = 30) -> List[Dict]:
     """
     Search EDGAR for Form D filings matching a keyword.
     Filters by file_date post-fetch since dateRange param is unreliable.
+    Default window is 30 days — no data older than that will be returned.
     """
     cutoff = (datetime.today() - timedelta(days=days_back)).date()
 
@@ -193,7 +205,7 @@ def edgar_form_d(query: str, days_back: int = 60) -> List[Dict]:
 
 def edgar_form_d_batch(
     terms: List[str],
-    days_back: int = 60,
+    days_back: int = 30,
     fetch_detail: bool = False,
 ) -> List[Dict]:
     """
@@ -215,8 +227,39 @@ def edgar_form_d_batch(
     return results
 # ── RSS Parser ────────────────────────────────────────────────────────── #
 
-def parse_rss(url: str, source_name: str = "RSS") -> List[Dict]:
-    """Parse any RSS/Atom feed."""
+_RSS_DATE_FORMATS = [
+    "%a, %d %b %Y %H:%M:%S %z",   # RFC 2822 — most RSS feeds
+    "%a, %d %b %Y %H:%M:%S %Z",   # RFC 2822 with timezone name (e.g. GMT)
+    "%Y-%m-%dT%H:%M:%S%z",        # ISO 8601 — Atom feeds
+    "%Y-%m-%dT%H:%M:%SZ",         # ISO 8601 UTC
+    "%Y-%m-%d %H:%M:%S",          # loose datetime
+    "%Y-%m-%d",                   # date only
+]
+
+MAX_ITEM_AGE_DAYS = 30
+
+
+def _parse_rss_date(date_str: str) -> Optional[datetime]:
+    """Try every known RSS date format; return a naive UTC datetime or None."""
+    if not date_str:
+        return None
+    date_str = date_str.strip()
+    for fmt in _RSS_DATE_FORMATS:
+        try:
+            dt = datetime.strptime(date_str, fmt)
+            # Normalise to naive UTC so we can compare against datetime.utcnow()
+            if dt.tzinfo is not None:
+                dt = dt.utctimetuple()
+                dt = datetime(*dt[:6])
+            return dt
+        except ValueError:
+            continue
+    return None
+
+
+def parse_rss(url: str, source_name: str = "RSS", days_back: int = MAX_ITEM_AGE_DAYS) -> List[Dict]:
+    """Parse any RSS/Atom feed, dropping items older than *days_back* days."""
+    cutoff = datetime.utcnow() - timedelta(days=days_back)
     try:
         r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
         if not r.ok:
@@ -242,12 +285,29 @@ def parse_rss(url: str, source_name: str = "RSS") -> List[Dict]:
                 or entry.findtext("atom:summary", namespaces=ns)
                 or ""
             ).strip()
+
+            # ── Date filter ──────────────────────────────────────────── #
+            pub_raw = (
+                entry.findtext("pubDate")
+                or entry.findtext("published")
+                or entry.findtext("atom:published", namespaces=ns)
+                or entry.findtext("updated")
+                or entry.findtext("atom:updated", namespaces=ns)
+                or ""
+            )
+            pub_dt = _parse_rss_date(pub_raw)
+            if pub_dt is not None and pub_dt < cutoff:
+                continue  # item is older than the cutoff — skip
+            # If we can't parse the date at all, let the item through
+            # (better to include an undated item than to silently drop it)
+
             if title:
                 items.append({
                     "name": title,
                     "description": desc or title,
                     "url": link,
                     "source": source_name,
+                    "pub_date": pub_raw,
                 })
         return items
     except Exception:
@@ -467,8 +527,9 @@ def crunchbase_search(query: str, days_back: int = 30) -> List[Dict]:
 
 # ── NewsAPI ───────────────────────────────────────────────────────────── #
 
-def newsapi_search(query: str, days_back: int = 7, page_size: int = 50) -> List[Dict]:
-    """Search NewsAPI for startup/funding headlines. Requires NEWSAPI_KEY."""
+def newsapi_search(query: str, days_back: int = 30, page_size: int = 50) -> List[Dict]:
+    """Search NewsAPI for startup/funding headlines. Requires NEWSAPI_KEY.
+    Note: NewsAPI free tier caps history at 30 days, so days_back=30 is the maximum."""
     key = _get_secret("NEWSAPI_KEY")
     if not key:
         return []

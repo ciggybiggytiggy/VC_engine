@@ -48,361 +48,422 @@ from utils.portfolios import (
 )
 
 # ------------------------------------------------------------------ #
-#  Styling — Cheetah Print Editorial Theme                             #
+#  Styling — Celine x Jane Street                                      #
+#  Full obsidian dark mode. Champagne gold rules. Ice white type.      #
+#  Fashion house precision meets quantitative trading terminal.        #
 # ------------------------------------------------------------------ #
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Montserrat:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500;600&family=Neue+Haas+Grotesk+Display+Pro:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
   /* ─────────────────────────────────────────────────────────
      THE C-NOTE — Maison Capital
-     Bottega Veneta x Bloomberg Terminal
-     Bone. Ink. Lacquer red. Nothing else.
+     Celine SS25 x Jane Street Terminal
+     Obsidian. Champagne. Ice white. Absolute precision.
   ───────────────────────────────────────────────────────── */
   :root {
-    --bone:        #F2EDE4;
-    --bone-deep:   #E8E0D4;
-    --parchment:   #EDE6DA;
-    --ink:         #0A0A0A;
-    --ink-soft:    #1A1A1A;
-    --ink-muted:   #2C2C2C;
-    --graphite:    #4A4A4A;
-    --dust:        #8A8480;
-    --fog:         #B8B4AE;
-    --lacquer:     #C41E2A;
-    --lacquer-dk:  #8B1520;
-    --lacquer-lt:  #E8424F;
-    --carbon:      #0F0F0F;
-    --panel:       #F7F3EC;
-    --rule:        #D4CEC6;
-    --rule-strong: #A09890;
-    --white:       #FAFAF8;
+    --void:        #080808;
+    --obsidian:    #0D0D0D;
+    --obsidian-2:  #111111;
+    --obsidian-3:  #161616;
+    --obsidian-4:  #1C1C1C;
+    --obsidian-5:  #222222;
+    --smoke:       #2A2A2A;
+    --graphite:    #3A3A3A;
+    --iron:        #555555;
+    --steel:       #777777;
+    --silver:      #9A9A9A;
+    --fog:         #C0C0C0;
+    --ice:         #E8E8E8;
+    --white:       #F5F5F5;
+
+    --gold:        #C9A84C;
+    --gold-lt:     #E2C476;
+    --gold-dk:     #8A6E2A;
+    --gold-muted:  #7A6235;
+    --gold-dim:    rgba(201,168,76,0.15);
+    --gold-glow:   rgba(201,168,76,0.06);
+
+    --signal:      #4AE0A0;
+    --signal-dim:  rgba(74,224,160,0.12);
+
+    --rule:        rgba(201,168,76,0.18);
+    --rule-strong: rgba(201,168,76,0.35);
+    --rule-hard:   rgba(201,168,76,0.55);
   }
 
-  /* ── Base: bone white, like heavy stock paper ── */
+  /* ── Base ── */
   html, body,
   [data-testid="stAppViewContainer"],
   [data-testid="stApp"] {
-    background-color: var(--bone) !important;
-    font-family: 'Montserrat', sans-serif !important;
+    background-color: var(--void) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
   }
 
-  /* ── Subtle halftone grain on the background ── */
+  /* Subtle grain texture on the background */
   [data-testid="stAppViewContainer"]::before {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-      radial-gradient(circle at 1px 1px, rgba(10,10,10,0.04) 1px, transparent 0);
-    background-size: 24px 24px;
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.6;
   }
 
-  /* ── Main content: clean white sheet laid over parchment ── */
+  /* ── Main content pane ── */
   [data-testid="stMainBlockContainer"],
   [data-testid="block-container"] {
-    background: var(--white) !important;
+    background: var(--obsidian-2) !important;
     border-radius: 0 !important;
     padding: 3rem 4rem !important;
     border: none !important;
     border-left: 1px solid var(--rule) !important;
     border-right: 1px solid var(--rule) !important;
-    box-shadow: 0 1px 0 var(--rule), 0 40px 80px rgba(10,10,10,0.08) !important;
+    box-shadow:
+      0 0 0 1px rgba(201,168,76,0.06),
+      0 40px 120px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(201,168,76,0.08) !important;
     position: relative !important;
     z-index: 1 !important;
   }
 
-  /* ── The red rule at top — like a luxury masthead ── */
+  /* Gold top rule — the signature mark */
   [data-testid="stMainBlockContainer"]::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--lacquer);
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      var(--gold) 20%,
+      var(--gold-lt) 50%,
+      var(--gold) 80%,
+      transparent 100%
+    );
+    opacity: 0.8;
   }
 
-  /* ── All text defaults ── */
+  /* ── Global text ── */
   [data-testid="stMainBlockContainer"],
   [data-testid="stMainBlockContainer"] p,
   [data-testid="stMainBlockContainer"] span,
   [data-testid="stMainBlockContainer"] div,
   [data-testid="stMainBlockContainer"] label,
   [data-testid="stMainBlockContainer"] li {
-    color: var(--ink) !important;
-    font-family: 'Montserrat', sans-serif !important;
+    color: var(--fog) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
   }
 
-  /* ── Display headings — editorial Playfair ── */
+  /* ── Typography ── */
   h1 {
-    font-family: 'Playfair Display', serif !important;
-    font-weight: 900 !important;
-    font-size: 3.2rem !important;
-    letter-spacing: -0.02em !important;
-    color: var(--ink) !important;
-    line-height: 1.0 !important;
-    margin-bottom: 0.1em !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 300 !important;
+    font-size: 4rem !important;
+    letter-spacing: 0.04em !important;
+    color: var(--white) !important;
+    line-height: 0.95 !important;
+    margin-bottom: 0.08em !important;
+    text-transform: uppercase !important;
   }
   h2 {
-    font-family: 'Playfair Display', serif !important;
-    font-weight: 700 !important;
-    font-size: 1.8rem !important;
-    color: var(--ink) !important;
-    letter-spacing: -0.01em !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 400 !important;
+    font-size: 2rem !important;
+    color: var(--white) !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
   }
   h3 {
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 0.75rem !important;
-    color: var(--graphite) !important;
-    letter-spacing: 0.2em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-weight: 400 !important;
+    font-size: 0.62rem !important;
+    color: var(--gold) !important;
+    letter-spacing: 0.28em !important;
     text-transform: uppercase !important;
   }
   h4 {
-    font-family: 'Playfair Display', serif !important;
+    font-family: 'Cormorant Garamond', serif !important;
     font-weight: 500 !important;
-    font-size: 1.1rem !important;
-    color: var(--ink) !important;
-    letter-spacing: 0 !important;
+    font-size: 1.15rem !important;
+    color: var(--ice) !important;
+    letter-spacing: 0.02em !important;
   }
 
-  /* ── Sidebar — deep ink, like a book spine ── */
+  /* ── Sidebar ── */
   [data-testid="stSidebar"] {
-    background: var(--ink) !important;
-    border-right: none !important;
+    background: var(--void) !important;
+    border-right: 1px solid var(--rule) !important;
   }
-
-  /* Fine red rule at top of sidebar */
   [data-testid="stSidebar"]::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--lacquer);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
   }
-
   [data-testid="stSidebar"] *,
   [data-testid="stSidebar"] p,
   [data-testid="stSidebar"] span,
   [data-testid="stSidebar"] div {
-    color: var(--fog) !important;
-    font-family: 'Montserrat', sans-serif !important;
+    color: var(--steel) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
   }
-
   [data-testid="stSidebar"] h1,
-  [data-testid="stSidebar"] h2,
-  [data-testid="stSidebar"] h3 {
-    color: var(--bone) !important;
-    font-family: 'Playfair Display', serif !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.01em !important;
-    text-transform: none !important;
-    font-size: 1.4rem !important;
+  [data-testid="stSidebar"] h2 {
+    color: var(--white) !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    font-size: 1.5rem !important;
   }
-
-  [data-testid="stSidebar"] label {
-    color: var(--dust) !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.62rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.18em !important;
+  [data-testid="stSidebar"] h3 {
+    color: var(--gold) !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.58rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.28em !important;
     text-transform: uppercase !important;
   }
-
+  [data-testid="stSidebar"] label {
+    color: var(--iron) !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.58rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.22em !important;
+    text-transform: uppercase !important;
+  }
   [data-testid="stSidebar"] .stButton > button {
     background: transparent !important;
-    color: var(--bone) !important;
-    border: 1px solid rgba(242,237,228,0.2) !important;
+    color: var(--fog) !important;
+    border: 1px solid var(--rule-strong) !important;
     border-radius: 0 !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 0.65rem !important;
-    letter-spacing: 0.2em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-weight: 400 !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.22em !important;
     text-transform: uppercase !important;
     padding: 12px 20px !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.25s ease !important;
   }
   [data-testid="stSidebar"] .stButton > button:hover {
-    background: var(--lacquer) !important;
-    color: var(--white) !important;
-    border-color: var(--lacquer) !important;
+    background: var(--gold-dim) !important;
+    color: var(--gold-lt) !important;
+    border-color: var(--gold) !important;
   }
-
-  /* Sidebar selectbox */
   [data-testid="stSidebar"] [data-testid="stSelectbox"] > div > div {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
+    background: var(--obsidian-3) !important;
+    border: 1px solid var(--smoke) !important;
     border-radius: 0 !important;
-    color: var(--bone) !important;
+    color: var(--fog) !important;
+  }
+  [data-testid="stSidebar"] hr {
+    border-top: 1px solid var(--rule) !important;
   }
 
-  /* ── Metric cards — ticker-board style ── */
+  /* ── Metric cards ── */
   [data-testid="metric-container"] {
-    background: var(--panel) !important;
+    background: var(--obsidian-3) !important;
     border: none !important;
-    border-top: 2px solid var(--ink) !important;
+    border-top: 1px solid var(--rule-hard) !important;
     border-radius: 0 !important;
     padding: 20px 24px 18px !important;
-    box-shadow: none !important;
+    box-shadow:
+      0 1px 0 rgba(201,168,76,0.05),
+      inset 0 0 40px rgba(201,168,76,0.02) !important;
     position: relative !important;
+    transition: border-color 0.2s !important;
+  }
+  [data-testid="metric-container"]:hover {
+    border-top-color: var(--gold-lt) !important;
   }
   [data-testid="metric-container"] label {
-    color: var(--dust) !important;
-    font-size: 0.58rem !important;
-    font-weight: 700 !important;
+    color: var(--iron) !important;
+    font-size: 0.55rem !important;
+    font-weight: 400 !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.2em !important;
-    font-family: 'Montserrat', sans-serif !important;
+    letter-spacing: 0.26em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
   }
   [data-testid="metric-container"] [data-testid="stMetricValue"] {
-    color: var(--ink) !important;
-    font-family: 'Playfair Display', serif !important;
-    font-size: 2.8rem !important;
-    font-weight: 900 !important;
+    color: var(--white) !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 3.2rem !important;
+    font-weight: 300 !important;
     line-height: 1 !important;
-    letter-spacing: -0.03em !important;
+    letter-spacing: -0.01em !important;
   }
   [data-testid="metric-container"] [data-testid="stMetricDelta"] {
-    color: var(--lacquer) !important;
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.72rem !important;
+    color: var(--gold) !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.68rem !important;
   }
 
-  /* ── Section headers — WSJ-style column labels ── */
+  /* ── Section headers ── */
   .section-header {
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.58rem !important;
-    font-weight: 700 !important;
-    color: var(--dust) !important;
-    padding: 0 0 10px 0 !important;
-    border-bottom: 1px solid var(--ink) !important;
-    margin-bottom: 24px !important;
-    letter-spacing: 0.22em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.55rem !important;
+    font-weight: 400 !important;
+    color: var(--gold) !important;
+    padding: 0 0 12px 0 !important;
+    border-bottom: 1px solid var(--rule) !important;
+    margin-bottom: 28px !important;
+    letter-spacing: 0.3em !important;
     text-transform: uppercase !important;
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
+    gap: 14px !important;
   }
   .section-header::before {
     content: '';
     display: inline-block;
-    width: 18px;
-    height: 2px;
-    background: var(--lacquer);
+    width: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
     flex-shrink: 0;
   }
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--rule), transparent);
+    margin-left: auto;
+  }
 
-  /* ── Pick cards — editorial article cards ── */
+  /* ── Pick cards ── */
   .pick-card {
-    background: var(--white);
+    background: transparent;
     border: none;
     border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
     border-radius: 0;
-    padding: 22px 0;
+    padding: 24px 0;
     margin-bottom: 0;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     position: relative;
   }
-  .pick-card + .pick-card {
-    border-top: none;
+  .pick-card + .pick-card { border-top: none; }
+  .pick-card::before {
+    content: '';
+    position: absolute;
+    left: -4rem;
+    top: 0; bottom: 0;
+    width: 0;
+    background: var(--gold-glow);
+    transition: width 0.3s ease;
+  }
+  .pick-card:hover::before {
+    width: calc(100% + 8rem);
   }
   .pick-card:hover {
-    background: var(--panel);
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-left: -16px;
-    margin-right: -16px;
+    border-top-color: var(--rule-strong);
   }
   .pick-card h4 {
-    margin: 0 0 6px 0 !important;
-    color: var(--ink) !important;
-    font-family: 'Playfair Display', serif !important;
-    font-size: 1.2rem !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.01em !important;
-    line-height: 1.3 !important;
+    margin: 0 0 8px 0 !important;
+    color: var(--white) !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: 1.35rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.01em !important;
+    line-height: 1.2 !important;
+    position: relative;
   }
   .pick-card h4 a {
-    color: var(--ink) !important;
+    color: var(--white) !important;
     text-decoration: none !important;
-    border-bottom: 1px solid var(--lacquer) !important;
+    border-bottom: 1px solid var(--gold-muted) !important;
     padding-bottom: 1px !important;
+    transition: border-color 0.2s, color 0.2s !important;
   }
   .pick-card h4 a:hover {
-    color: var(--lacquer) !important;
+    color: var(--gold-lt) !important;
+    border-bottom-color: var(--gold-lt) !important;
   }
   .pick-card p {
-    margin: 4px 0 0 0 !important;
-    color: var(--graphite) !important;
-    font-size: 0.82rem !important;
-    line-height: 1.6 !important;
-    font-family: 'Montserrat', sans-serif !important;
+    margin: 6px 0 0 0 !important;
+    color: var(--steel) !important;
+    font-size: 0.8rem !important;
+    line-height: 1.7 !important;
+    font-family: 'Space Grotesk', sans-serif !important;
     font-weight: 400 !important;
+    position: relative;
   }
 
-  /* ── Badges — tight mono labels ── */
+  /* ── Badges ── */
   .badge {
     display: inline-block;
     background: transparent;
-    color: var(--graphite) !important;
+    color: var(--iron) !important;
     border-radius: 0;
-    padding: 2px 7px;
-    font-size: 0.55rem;
-    font-weight: 600;
+    padding: 2px 8px;
+    font-size: 0.5rem;
+    font-weight: 400;
     margin-right: 5px;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    border: 1px solid var(--rule-strong);
-    font-family: 'Montserrat', sans-serif !important;
+    border: 1px solid var(--smoke);
+    font-family: 'IBM Plex Mono', monospace !important;
+    transition: all 0.2s;
   }
   .badge-green {
     background: transparent !important;
-    color: var(--ink) !important;
-    border: 1px solid var(--ink) !important;
+    color: var(--gold) !important;
+    border: 1px solid var(--gold-muted) !important;
   }
   .badge-orange {
-    background: var(--lacquer) !important;
-    color: var(--white) !important;
-    border: 1px solid var(--lacquer) !important;
-    font-weight: 700 !important;
+    background: var(--gold-dim) !important;
+    color: var(--gold-lt) !important;
+    border: 1px solid var(--gold) !important;
+    font-weight: 600 !important;
   }
 
-  /* ── New-tag pill ── */
+  /* ── New tag ── */
   .new-tag {
-    background: var(--lacquer);
-    color: var(--white) !important;
+    background: transparent;
+    color: var(--signal) !important;
+    border: 1px solid var(--signal) !important;
     border-radius: 0;
-    padding: 2px 7px;
-    font-size: 0.55rem;
-    font-weight: 700;
+    padding: 1px 7px;
+    font-size: 0.48rem;
+    font-weight: 400;
     margin-left: 8px;
-    border: none;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    font-family: 'Montserrat', sans-serif !important;
+    letter-spacing: 0.2em;
+    font-family: 'IBM Plex Mono', monospace !important;
   }
 
-  /* ── DataFrames — broadsheet table ── */
+  /* ── Data tables ── */
   [data-testid="stDataFrame"] {
     border: none !important;
-    border-top: 2px solid var(--ink) !important;
+    border-top: 1px solid var(--gold) !important;
     border-radius: 0 !important;
     overflow: hidden !important;
   }
   [data-testid="stDataFrame"] table {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.75rem !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.72rem !important;
+    background: var(--obsidian-2) !important;
   }
   [data-testid="stDataFrame"] th {
-    background: var(--ink) !important;
-    color: var(--bone) !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.58rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.15em !important;
+    background: var(--obsidian-4) !important;
+    color: var(--gold) !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.5rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.22em !important;
     text-transform: uppercase !important;
     padding: 10px 14px !important;
+    border-bottom: 1px solid var(--rule) !important;
+  }
+  [data-testid="stDataFrame"] td {
+    background: transparent !important;
+    color: var(--fog) !important;
+    border-bottom: 1px solid rgba(201,168,76,0.06) !important;
+  }
+  [data-testid="stDataFrame"] tr:hover td {
+    background: var(--gold-glow) !important;
   }
 
   /* ── Expanders ── */
@@ -413,130 +474,167 @@ st.markdown("""
     background: transparent !important;
   }
   [data-testid="stExpander"] summary {
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.65rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.15em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.58rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.2em !important;
     text-transform: uppercase !important;
-    color: var(--graphite) !important;
+    color: var(--iron) !important;
+    transition: color 0.2s !important;
+  }
+  [data-testid="stExpander"] summary:hover {
+    color: var(--gold) !important;
   }
 
-  /* ── Horizontal rule ── */
+  /* ── HR dividers ── */
   hr {
     border: none !important;
     border-top: 1px solid var(--rule) !important;
-    margin: 2.5rem 0 !important;
+    margin: 3rem 0 !important;
   }
 
-  /* ── Alerts ── */
+  /* ── Alerts / status ── */
   [data-testid="stAlert"] {
-    background: var(--panel) !important;
-    border: none !important;
-    border-left: 3px solid var(--lacquer) !important;
-    border-radius: 0 !important;
-    color: var(--ink) !important;
-  }
-
-  /* ── Status widget ── */
-  [data-testid="stStatusWidget"] {
-    background: var(--panel) !important;
+    background: var(--obsidian-4) !important;
     border: 1px solid var(--rule) !important;
-    border-top: 2px solid var(--lacquer) !important;
+    border-left: 2px solid var(--gold) !important;
     border-radius: 0 !important;
+    color: var(--fog) !important;
   }
 
-  /* ── Selectbox / multiselect ── */
+  [data-testid="stStatusWidget"] {
+    background: var(--obsidian-3) !important;
+    border: 1px solid var(--rule) !important;
+    border-top: 1px solid var(--gold) !important;
+    border-radius: 0 !important;
+    color: var(--fog) !important;
+  }
+
+  /* ── Inputs ── */
   [data-testid="stSelectbox"] > div > div,
   [data-testid="stMultiSelect"] > div > div {
-    background: var(--white) !important;
-    border: 1px solid var(--rule-strong) !important;
+    background: var(--obsidian-3) !important;
+    border: 1px solid var(--smoke) !important;
     border-radius: 0 !important;
-    color: var(--ink) !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.82rem !important;
+    color: var(--fog) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 0.8rem !important;
   }
   [data-testid="stSelectbox"] > div > div:focus-within,
   [data-testid="stMultiSelect"] > div > div:focus-within {
-    border-color: var(--ink) !important;
-    box-shadow: none !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 2px var(--gold-dim) !important;
   }
 
-  /* ── Text inputs ── */
   [data-testid="stTextInput"] input {
-    background: var(--white) !important;
-    border: 1px solid var(--rule-strong) !important;
+    background: var(--obsidian-3) !important;
+    border: 1px solid var(--smoke) !important;
     border-radius: 0 !important;
-    color: var(--ink) !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-size: 0.82rem !important;
+    color: var(--fog) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-size: 0.8rem !important;
     padding: 10px 14px !important;
   }
   [data-testid="stTextInput"] input:focus {
-    border-color: var(--ink) !important;
-    box-shadow: none !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 2px var(--gold-dim) !important;
   }
 
-  /* ── Primary button (Run Analysis) ── */
+  /* ── Buttons ── */
   .stButton > button[kind="primary"],
   button[data-testid="baseButton-primary"] {
-    background: var(--ink) !important;
-    color: var(--bone) !important;
-    border: none !important;
+    background: transparent !important;
+    color: var(--gold-lt) !important;
+    border: 1px solid var(--gold) !important;
     border-radius: 0 !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.65rem !important;
-    letter-spacing: 0.22em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-weight: 400 !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.28em !important;
     text-transform: uppercase !important;
     padding: 14px 28px !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.25s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  .stButton > button[kind="primary"]::before,
+  button[data-testid="baseButton-primary"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold-dim);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .stButton > button[kind="primary"]:hover::before,
+  button[data-testid="baseButton-primary"]:hover::before {
+    transform: scaleX(1);
   }
   .stButton > button[kind="primary"]:hover,
   button[data-testid="baseButton-primary"]:hover {
-    background: var(--lacquer) !important;
-    color: var(--white) !important;
+    color: var(--gold-lt) !important;
+    border-color: var(--gold-lt) !important;
+    box-shadow: 0 0 20px var(--gold-dim) !important;
   }
 
-  /* ── Download buttons ── */
   .stDownloadButton > button {
     background: transparent !important;
-    color: var(--ink) !important;
-    border: 1px solid var(--ink) !important;
+    color: var(--steel) !important;
+    border: 1px solid var(--smoke) !important;
     border-radius: 0 !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 600 !important;
-    font-size: 0.62rem !important;
-    letter-spacing: 0.18em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-weight: 400 !important;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.2em !important;
     text-transform: uppercase !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.25s ease !important;
   }
   .stDownloadButton > button:hover {
-    background: var(--ink) !important;
-    color: var(--bone) !important;
+    background: var(--obsidian-4) !important;
+    color: var(--gold) !important;
+    border-color: var(--gold-muted) !important;
   }
 
-  /* ── Scrollbar — thin, elegant ── */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bone-deep); }
-  ::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 0; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--lacquer); }
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track { background: var(--void); }
+  ::-webkit-scrollbar-thumb { background: var(--smoke); border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-muted); }
 
-  /* ── Plotly chart containers ── */
+  /* ── Chart container ── */
   [data-testid="stPlotlyChart"] {
     border-top: 1px solid var(--rule) !important;
-    padding-top: 8px !important;
+    padding-top: 10px !important;
+    background: transparent !important;
   }
 
-  /* ── Caption / small text ── */
+  /* ── Captions ── */
   [data-testid="stCaptionContainer"] p,
   .stCaption p {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.68rem !important;
-    color: var(--dust) !important;
-    letter-spacing: 0.02em !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.62rem !important;
+    color: var(--iron) !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  /* ── Multiselect tags ── */
+  [data-testid="stMultiSelect"] span[data-baseweb="tag"] {
+    background: var(--obsidian-5) !important;
+    border: 1px solid var(--rule) !important;
+    border-radius: 0 !important;
+    color: var(--gold) !important;
+    font-family: 'IBM Plex Mono', monospace !important;
+    font-size: 0.58rem !important;
+  }
+
+  /* ── Spinner / loading ── */
+  [data-testid="stSpinner"] {
+    color: var(--gold) !important;
   }
 </style>
 """, unsafe_allow_html=True)
+
 
 # ------------------------------------------------------------------ #
 #  Portfolio data (cached — no need to re-scrape on every run)        #
@@ -576,9 +674,12 @@ def run_pipeline(industry_key: str, scraper_name: str):
     competitor_portfolios = portfolios["competitor_portfolios"]
 
     scraper_fn = scraper_map[scraper_name]
-    raw_df = scraper_fn()
+    if isinstance(scraper_fn, tuple):
+        raw_dfs = [fn() for fn in scraper_fn]
+    else:
+        raw_dfs = [scraper_fn()]
 
-    df = clean_data([raw_df])
+    df = clean_data(raw_dfs)
     if df.empty:
         return df, {}, competitor_portfolios
 
@@ -669,106 +770,10 @@ with st.sidebar:
         st.cache_data.clear()
         st.session_state.last_industry = selected_key
 
-      # ── TEMPORARY DEBUG — replace previous debug block in sidebar ── #
-
-    if st.button("Debug Sources", use_container_width=True):
-        import requests
-        import xml.etree.ElementTree as ET
-        from datetime import datetime, timedelta
-
-        HEADERS = {"User-Agent": "Mozilla/5.0"}
-
-        st.markdown("### Source Debug")
-
-        # 1. RSS feeds — test new sources too
-        feeds = [
-            ("https://www.builtinchicago.org/feed",          "Built In Chicago (alt)"),
-            ("https://www.chicagobusiness.com/rss/news",      "Crain's Chicago"),
-            ("https://news.crunchbase.com/feed/",             "Crunchbase News"),
-            ("https://techcrunch.com/tag/funding/feed/",      "TechCrunch Funding"),
-            ("https://www.finsmes.com/feed",                  "FinSMEs"),
-            ("https://www.geekwire.com/feed/",                "GeekWire"),
-        ]
-        for url, name in feeds:
-            try:
-                r = requests.get(url, headers=HEADERS, timeout=8)
-                if r.ok:
-                    try:
-                        root = ET.fromstring(r.content)
-                        items = root.findall(".//item")
-                        st.write(f"✓ {name}: {r.status_code}, {len(items)} items")
-                    except:
-                        st.write(f"✓ {name}: {r.status_code}, XML parse error")
-                else:
-                    st.write(f"✗ {name}: {r.status_code}")
-            except Exception as e:
-                st.write(f"✗ {name}: {str(e)[:80]}")
-
-        # 2. EDGAR — show exactly what comes back
-        st.markdown("---")
-        st.markdown("**EDGAR Raw:**")
-        try:
-            start = (datetime.today() - timedelta(days=60)).strftime("%Y-%m-%d")
-            r = requests.get(
-                "https://efts.sec.gov/LATEST/search-index",
-                headers={"User-Agent": "deal-flow-tool contact@test.com"},
-                params={"q": '"Chicago"', "dateRange": "custom",
-                        "startdt": start, "forms": "D"},
-                timeout=12,
-            )
-            st.write(f"Status: {r.status_code}")
-            if r.ok:
-                data = r.json()
-                hits = data.get("hits", {}).get("hits", [])
-                total = data.get("hits", {}).get("total", {})
-                st.write(f"Total: {total} | Returned: {len(hits)}")
-                if hits:
-                    st.write("First hit:", hits[0])
-                else:
-                    st.write("Full response:", data)
-            else:
-                st.write("Body:", r.text[:300])
-        except Exception as e:
-            st.write(f"Error: {e}")
-
-        # 3. EDGAR with wider date and no quotes
-        st.markdown("**EDGAR wider search (Illinois, no quotes, 180d):**")
-        try:
-            r2 = requests.get(
-                "https://efts.sec.gov/LATEST/search-index",
-                headers={"User-Agent": "deal-flow-tool contact@test.com"},
-                params={"q": "Illinois", "dateRange": "custom",
-                        "startdt": "2025-09-01", "forms": "D"},
-                timeout=12,
-            )
-            st.write(f"Status: {r2.status_code}")
-            if r2.ok:
-                hits = r2.json().get("hits", {}).get("hits", [])
-                total = r2.json().get("hits", {}).get("total", {})
-                st.write(f"Total: {total} | Returned: {len(hits)}")
-                if hits:
-                    st.write("Keys:", list(hits[0].get("_source", {}).keys()))
-                    st.write("Sample:", hits[0].get("_source", {}))
-        except Exception as e:
-            st.write(f"Error: {e}")
-
-        # 4. Show raw Crunchbase RSS titles to confirm name extraction issue
-        st.markdown("---")
-        st.markdown("**Crunchbase RSS titles (raw):**")
-        try:
-            r3 = requests.get("https://news.crunchbase.com/feed/",
-                              headers=HEADERS, timeout=8)
-            if r3.ok:
-                root = ET.fromstring(r3.content)
-                for item in root.findall(".//item")[:5]:
-                    st.write(f"• {item.findtext('title', '')[:90]}")
-        except Exception as e:
-            st.write(f"Error: {e}")
     st.markdown("---")
     st.markdown("### Fund Settings")
     fund_name = st.text_input("Fund Name", value="Chicago Ventures")
     analyst_name = st.text_input("Analyst Name", value="")
-
     st.markdown("---")
     st.markdown("### Filters")
     stage_filter = st.multiselect(
@@ -782,10 +787,10 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("""
-    <p style="color:#5A5650; font-size:.68rem; line-height:1.7">
-    Built by <strong style="color:#9A9490">Catherine Walker </strong><br>
-    Tracking pre-seed & seed deals in Fintech, Health, and B2B SaaS<br>
-    focusing on Chicago-area Funds.
+    <p style="color:#2A2A2A; font-size:.6rem; line-height:1.9; font-family:'IBM Plex Mono',monospace; letter-spacing:.06em">
+    Built by <span style="color:#555">Catherine Walker</span><br>
+    Tracking pre-seed &amp; seed in Fintech,<br>Health, and B2B SaaS<br>
+    <span style="color:#3A3A3A">Chicago-area focus</span>
     </p>
     """, unsafe_allow_html=True)
 
@@ -798,14 +803,14 @@ st.markdown('<div class="section-header"> The who, the how, the why — today’
 
 if not run_btn:
     st.markdown("""
-    <div style="border:1px solid #2A2A30; border-left:3px solid #C9A84C; 
-    background:#1C1C20; padding:28px 32px; border-radius:2px; margin-bottom:2rem">
-    <p style="color:#C9A84C; font-size:.65rem; font-weight:700; 
-    letter-spacing:.16em; text-transform:uppercase; margin:0 0 12px 0">
-    Why This Exists</p>
-    <p style="color:#F5F0E8; font-size:1.05rem; line-height:1.8; margin:0">
+    <div style="border:1px solid rgba(201,168,76,0.2); border-left:1px solid rgba(201,168,76,0.6); 
+    background:rgba(201,168,76,0.04); padding:32px 36px; margin-bottom:2.5rem">
+    <p style="color:#C9A84C; font-size:.52rem; font-weight:400; font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.3em; text-transform:uppercase; margin:0 0 14px 0">
+    — Signal Over Noise</p>
+    <p style="color:#C8C8C8; font-size:1.1rem; line-height:1.85; margin:0; font-family:'Cormorant Garamond',serif; font-weight:400; letter-spacing:0.01em">
     Early startup signals appear across fragmented sources long before companies show up in traditional deal databases.
-This platform aggregates signals like SEC Form D filings, Show HN launches, and founder RSS feeds to surface potential deals earlier in the sourcing pipeline.
+    This platform aggregates signals like SEC Form D filings, Show HN launches, and founder RSS feeds to surface potential deals earlier in the sourcing pipeline.
     </p>
     </div>
     """, unsafe_allow_html=True)
@@ -813,52 +818,45 @@ This platform aggregates signals like SEC Form D filings, Show HN launches, and 
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("""
-        <div style="border:1px solid #2A2A30; background:#1C1C20; 
-        padding:20px 24px; border-radius:2px; text-align:center">
-        <p style="color:#C9A84C; font-size:1.6rem; font-weight:600; 
-        font-family:'Cormorant Garamond',serif; margin:0">6</p>
-        <p style="color:#9A9490; font-size:.65rem; font-weight:700; 
-        letter-spacing:.14em; text-transform:uppercase; margin:4px 0 0 0">
+        <div style="border-top:1px solid rgba(201,168,76,0.55); background:#111; 
+        padding:24px 28px;">
+        <p style="color:#C9A84C; font-size:2.8rem; font-weight:300; 
+        font-family:'Cormorant Garamond',serif; margin:0; line-height:1; letter-spacing:-0.01em">6</p>
+        <p style="color:#555; font-size:.5rem; font-weight:400; font-family:'IBM Plex Mono',monospace;
+        letter-spacing:.26em; text-transform:uppercase; margin:10px 0 0 0">
         Data Sources</p>
         </div>""", unsafe_allow_html=True)
     with col2:
         st.markdown("""
-        <div style="border:1px solid #2A2A30; background:#1C1C20; 
-        padding:20px 24px; border-radius:2px; text-align:center">
-        <p style="color:#C9A84C; font-size:1.6rem; font-weight:600; 
-        font-family:'Cormorant Garamond',serif; margin:0">4</p>
-        <p style="color:#9A9490; font-size:.65rem; font-weight:700; 
-        letter-spacing:.14em; text-transform:uppercase; margin:4px 0 0 0">
-        Chicago VC Portfolios Tracked</p>
+        <div style="border-top:1px solid rgba(201,168,76,0.55); background:#111; 
+        padding:24px 28px;">
+        <p style="color:#C9A84C; font-size:2.8rem; font-weight:300; 
+        font-family:'Cormorant Garamond',serif; margin:0; line-height:1; letter-spacing:-0.01em">4</p>
+        <p style="color:#555; font-size:.5rem; font-weight:400; font-family:'IBM Plex Mono',monospace;
+        letter-spacing:.26em; text-transform:uppercase; margin:10px 0 0 0">
+        VC Portfolios Tracked</p>
         </div>""", unsafe_allow_html=True)
     with col3:
         st.markdown("""
-        <div style="border:1px solid #2A2A30; background:#1C1C20; 
-        padding:20px 24px; border-radius:2px; text-align:center">
-        <p style="color:#C9A84C; font-size:1.6rem; font-weight:600; 
-        font-family:'Cormorant Garamond',serif; margin:0">30min</p>
-        <p style="color:#9A9490; font-size:.65rem; font-weight:700; 
-        letter-spacing:.14em; text-transform:uppercase; margin:4px 0 0 0">
-        Cache — Instant on Demo</p>
+        <div style="border-top:1px solid rgba(201,168,76,0.55); background:#111; 
+        padding:24px 28px;">
+        <p style="color:#C9A84C; font-size:2.8rem; font-weight:300; 
+        font-family:'Cormorant Garamond',serif; margin:0; line-height:1; letter-spacing:-0.01em">30m</p>
+        <p style="color:#555; font-size:.5rem; font-weight:400; font-family:'IBM Plex Mono',monospace;
+        letter-spacing:.26em; text-transform:uppercase; margin:10px 0 0 0">
+        Cache Refresh</p>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <p style="color:#5A5650; font-size:.78rem; line-height:1.7">
-    <strong style="color:#9A9490">Sources:</strong> SEC EDGAR Form D · 
-    Hacker News Show HN · TechCrunch Funding · Crunchbase News · 
-    Built In Chicago · Chicago Inno · NewsAPI · Product Hunt<br>
-    <strong style="color:#9A9490">Portfolios:</strong> Chicago Ventures · 
-    Hyde Park Angels · M25 · Origin Ventures
+    <p style="color:#3A3A3A; font-size:.7rem; line-height:1.9; font-family:'IBM Plex Mono',monospace; letter-spacing:.04em">
+    <span style="color:#555">SOURCES —</span> SEC EDGAR Form D &nbsp;·&nbsp; Hacker News Show HN &nbsp;·&nbsp; TechCrunch Funding &nbsp;·&nbsp; Crunchbase News &nbsp;·&nbsp; Built In Chicago &nbsp;·&nbsp; Product Hunt<br>
+    <span style="color:#555">PORTFOLIOS —</span> Chicago Ventures &nbsp;·&nbsp; Hyde Park Angels &nbsp;·&nbsp; M25 &nbsp;·&nbsp; Origin Ventures
     </p>
     """, unsafe_allow_html=True)
     st.stop()
 
 # ── Run pipeline with progress indicator ── #
-@st.cache_data(ttl=1800, show_spinner=False)
-def run_pipeline(industry_key: str, scraper_name: str):
-    st.cache_data.clear()  # ← add this, remove after one run
-    
 status = st.status("Running my analysis…", expanded=True)
 with status:
     st.write("Looking for the next $10B valuation…")
@@ -924,8 +922,8 @@ m6.metric("Avg Score", f"{df['score'].mean():.1f}" if "score" in df.columns else
 
 st.markdown('<div class="section-header"> Catherine\'s Top 5 of The Week</div>', unsafe_allow_html=True)
 st.markdown("""
-<p style="color:#5A5650; font-size:.75rem; margin:-8px 0 16px 0">
-Ranked by composite score: funding stage · thesis alignment ·
+<p style="color:#3A3A3A; font-size:.62rem; margin:-8px 0 20px 0; font-family:'IBM Plex Mono',monospace; letter-spacing:.08em">
+Ranked by composite score — funding stage · thesis alignment ·
 Chicago geography · portfolio proximity · competitor overlap
 </p>
 """, unsafe_allow_html=True)
@@ -955,13 +953,13 @@ for i, row in top5.iterrows():
         for t in trend.split(",")[:2]:
             badges += f'<span class="badge">{t.strip()}</span>'
  
-    source_line = f'<p style="color:#5A5650;font-size:.72rem;margin-top:6px;">Source: {source}</p>' if source else ""
+    source_line = f'<p style="color:#3A3A3A;font-size:.58rem;margin-top:8px;font-family:IBM Plex Mono,monospace;letter-spacing:.1em;text-transform:uppercase;">via {source}</p>' if source else ""
  
     st.markdown(f"""
     <div class="pick-card">
       <h4>#{i+1} {name_html} &nbsp; {badges}</h4>
       <p>{rationale}</p>
-      <p style="color:#8A96A8;font-size:.78rem;margin-top:4px;">Score: <b>{score}</b></p>
+      <p style="color:#555;font-size:.6rem;margin-top:8px;font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;">Score &nbsp;<span style="color:#C9A84C">{score}</span></p>
       {source_line}
     </div>
     """, unsafe_allow_html=True)
@@ -986,7 +984,7 @@ with col_right:
  
 st.markdown('<div class="section-header"> Deal Flow Radar </div>', unsafe_allow_html=True)
 st.markdown("""
-<p style="color:#5A5650; font-size:.75rem; margin:-8px 0 16px 0">
+<p style="color:#3A3A3A; font-size:.62rem; margin:-8px 0 20px 0; font-family:'IBM Plex Mono',monospace; letter-spacing:.08em">
 Companies ranked by portfolio × competitor overlap — highest risk of losing to another fund
 </p>
 """, unsafe_allow_html=True)

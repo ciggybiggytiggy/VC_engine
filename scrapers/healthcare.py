@@ -44,7 +44,7 @@ class HealthcareScraper(BaseScraper):
         items = []
         items.extend(parse_rss_batch(HEALTHCARE_RSS))
         items.extend(fetch_funding_rss())
-        items.extend(edgar_form_d_batch(HEALTHCARE_EDGAR_TERMS, days_back=60))
+        items.extend(edgar_form_d_batch(HEALTHCARE_EDGAR_TERMS, days_back=30))
         for story in hn_show_stories(limit=100):
             if any(kw in story["description"].lower() for kw in HEALTHCARE_HN_KEYWORDS):
                 items.append(story)

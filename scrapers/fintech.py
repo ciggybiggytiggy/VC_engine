@@ -48,7 +48,7 @@ class FintechScraper(BaseScraper):
         items.extend(fetch_funding_rss())
 
         # 3. EDGAR Form D — 25 terms, 60-day window
-        items.extend(edgar_form_d_batch(FINTECH_EDGAR_TERMS, days_back=60))
+        items.extend(edgar_form_d_batch(FINTECH_EDGAR_TERMS, days_back=30))
 
         # 4. HN Show HN
         for story in hn_show_stories(limit=100):
